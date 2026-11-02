@@ -1,0 +1,817 @@
+/*
+ * Alárinà styles: "Ink and ivory", copied from fe/src/index.css so the admin app matches the
+ * couples' app. Keep the tokens in step with that file; the rules live in docs/style-guide.md.
+ * Admin-only layout and components are in admin.css.
+ *
+ * Contents: tokens → base → layout → components → utilities.
+ * Every text/background pair meets WCAG AA (4.5:1); field borders and focus meet 3:1.
+ */
+
+/* ── Tokens ─────────────────────────────────────────────────────────── */
+
+:root {
+  /* Colour: light */
+  --bg: #fafaf7;
+  --surface: #ffffff;
+  --text: #18181b;
+  --text-muted: #5c5c63;
+  --border: #e6e5e0;
+  --field-border: #85858b;
+  --primary: #18181b;
+  --primary-hover: #3a3a3f;
+  --on-primary: #ffffff;
+  --accent: #2e5a47;
+  --focus: #2e5a47;
+  --danger: #a3261a;
+  --danger-bg: #fbedeb;
+  --success: #1f6b3a;
+  --success-bg: #eaf5ee;
+
+  /* Type */
+  /* Brand: Bricolage Grotesque for headings and the wordmark, Geist for everything else.
+     Instrument Serif belongs to the invitation card only and is loaded by those pages. */
+  --font-display: 'Bricolage Grotesque Variable', 'Geist Variable', system-ui, sans-serif;
+  --font-sans: 'Geist Variable', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-invite: 'Instrument Serif', Georgia, 'Times New Roman', serif;
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.5rem;
+  --text-2xl: 2rem;
+  /* Regular everywhere. Semibold is reserved for the main heading (h1) and the wordmark. */
+  --weight-regular: 400;
+  --weight-heading: 600;
+
+  /* Space (4px grid) */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-24: 6rem;
+
+  /* Shape */
+  --radius: 8px;
+  --radius-lg: 12px;
+  --control-height: 2.75rem;
+
+  color-scheme: light;
+  font: var(--weight-regular) var(--text-base) / 1.55 var(--font-sans);
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Colour: dark. Follows the OS unless data-theme pins a mode. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --bg: #121212;
+    --surface: #1c1c1e;
+    --text: #f4f4f2;
+    --text-muted: #a3a3a8;
+    --border: #2e2e31;
+    --field-border: #75757b;
+    --primary: #f4f4f2;
+    --primary-hover: #d6d6d3;
+    --on-primary: #121212;
+    --accent: #8fc1a9;
+    --focus: #8fc1a9;
+    --danger: #ff9a8f;
+    --danger-bg: #3a1f1b;
+    --success: #8fd6a8;
+    --success-bg: #17301f;
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme='dark'] {
+  --bg: #121212;
+  --surface: #1c1c1e;
+  --text: #f4f4f2;
+  --text-muted: #a3a3a8;
+  --border: #2e2e31;
+  --field-border: #75757b;
+  --primary: #f4f4f2;
+  --primary-hover: #d6d6d3;
+  --on-primary: #121212;
+  --accent: #8fc1a9;
+  --focus: #8fc1a9;
+  --danger: #ff9a8f;
+  --danger-bg: #3a1f1b;
+  --success: #8fd6a8;
+  --success-bg: #17301f;
+  color-scheme: dark;
+}
+
+/* ── Base ───────────────────────────────────────────────────────────── */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+}
+
+/* Browsers bold these by default; the style guide keeps all text regular. */
+strong,
+b,
+th,
+dt,
+legend,
+summary,
+label,
+button,
+input,
+select,
+textarea {
+  font-weight: var(--weight-regular);
+}
+
+h1,
+h2 {
+  font-family: var(--font-display);
+  line-height: 1.15;
+  margin: 0 0 var(--space-2);
+}
+
+h1 {
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-heading);
+  letter-spacing: -0.02em;
+}
+
+h2 {
+  font-size: var(--text-xl);
+  font-weight: var(--weight-regular);
+  letter-spacing: -0.01em;
+}
+
+h3 {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-regular);
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+
+p {
+  margin: 0 0 var(--space-4);
+}
+
+ul {
+  margin: var(--space-2) 0 0;
+  padding-left: var(--space-6);
+}
+
+a {
+  color: var(--accent);
+  text-underline-offset: 0.15em;
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* ── Layout ─────────────────────────────────────────────────────────── */
+
+.page {
+  width: 100%;
+  max-width: 28rem;
+  margin: 0 auto;
+  padding: var(--space-12) var(--space-4);
+}
+
+.page--wide {
+  max-width: 44rem;
+}
+
+/* Header row: wordmark on the left, an action or status on the right. */
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+.row--tight {
+  margin-bottom: var(--space-2);
+}
+
+.row .brand {
+  margin: 0;
+}
+
+/* Vertical rhythm between sibling blocks such as cards. */
+.stack {
+  display: grid;
+  gap: var(--space-6);
+}
+
+.section {
+  margin-top: var(--space-6);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.actions--end {
+  justify-content: flex-end;
+  margin-top: var(--space-6);
+}
+
+/* Back sits on the left; the forward actions stay on the right. */
+.actions__back {
+  margin-right: auto;
+}
+
+/* ── Components ─────────────────────────────────────────────────────── */
+
+.skip-link {
+  position: absolute;
+  left: var(--space-4);
+  top: -4rem;
+  padding: var(--space-2) var(--space-4);
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  z-index: 10;
+}
+
+.skip-link:focus {
+  top: var(--space-4);
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--control-height);
+  margin-bottom: var(--space-6);
+  color: var(--text);
+  text-decoration: none;
+}
+
+/* The logo (components/Logo.tsx): letters follow the text colour, the dot and full stop the accent. */
+.brand svg {
+  display: block;
+  width: auto;
+  height: 1.6rem;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+}
+
+.card > :last-child,
+.alert > :last-child {
+  margin-bottom: 0;
+}
+
+.eyebrow {
+  margin-bottom: var(--space-1);
+  font-size: var(--text-xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* Fields */
+
+.field {
+  display: grid;
+  gap: var(--space-1);
+  min-width: 0;
+  margin-bottom: var(--space-4);
+}
+
+.field label {
+  font-size: var(--text-sm);
+}
+
+.hint {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
+.field-error {
+  font-size: var(--text-sm);
+  color: var(--danger);
+}
+
+/* A label with a link on the right, e.g. Password / Forgot password? */
+.label-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+}
+
+/* Password input with a Show/Hide button inside its right edge. */
+.password-field {
+  position: relative;
+}
+
+.password-field input {
+  padding-right: 4.5rem;
+}
+
+.password-toggle {
+  position: absolute;
+  top: 0;
+  right: var(--space-3);
+  min-height: var(--control-height);
+  font-size: var(--text-sm);
+}
+
+/* Long email addresses break rather than push the card wider. */
+.break-anywhere {
+  overflow-wrap: anywhere;
+}
+
+.field-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: 0 var(--space-3);
+}
+
+input[type='text'],
+input[type='email'],
+input[type='password'],
+input[type='tel'],
+input[type='search'],
+input[type='date'],
+input[type='time'],
+textarea,
+select {
+  width: 100%;
+  min-width: 0;
+  min-height: var(--control-height);
+  padding: var(--space-2) var(--space-3);
+  font: inherit;
+  color: inherit;
+  background: var(--surface);
+  border: 1px solid var(--field-border);
+  border-radius: var(--radius);
+}
+
+textarea {
+  resize: vertical;
+  line-height: 1.5;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-muted);
+}
+
+/* Read-only values are shown, not edited: no field background, muted text. */
+input[readonly] {
+  color: var(--text-muted);
+  background: transparent;
+  border-style: dashed;
+}
+
+[aria-invalid='true'] {
+  border-color: var(--danger);
+}
+
+.form-footer {
+  margin: var(--space-4) 0 0;
+  color: var(--text-muted);
+}
+
+/* Buttons */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--control-height);
+  padding: var(--space-2) var(--space-6);
+  font: inherit;
+  text-decoration: none;
+  color: var(--on-primary);
+  background: var(--primary);
+  border: 1px solid var(--primary);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: background-color 120ms ease;
+}
+
+.btn:hover:not(:disabled) {
+  background: var(--primary-hover);
+  border-color: var(--primary-hover);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn--secondary {
+  color: var(--text);
+  background: transparent;
+  border-color: var(--border);
+}
+
+.btn--secondary:hover:not(:disabled) {
+  background: var(--bg);
+  border-color: var(--field-border);
+}
+
+.btn--block {
+  width: 100%;
+}
+
+.link-button {
+  padding: 0;
+  font: inherit;
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+/* Feedback */
+
+.alert {
+  margin-bottom: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--text-sm);
+  color: var(--danger);
+  background: var(--danger-bg);
+  border-radius: var(--radius);
+}
+
+.alert p {
+  margin: 0;
+}
+
+.alert--success {
+  color: var(--success);
+  background: var(--success-bg);
+}
+
+.alert--info {
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--border);
+}
+
+.badge {
+  display: inline-block;
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+}
+
+.badge--live {
+  color: var(--success);
+  background: var(--success-bg);
+  border-color: transparent;
+}
+
+.save-status {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  text-align: right;
+}
+
+/* Copyable link: read-only input with a button beside it */
+
+.link-box {
+  display: flex;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.link-box input {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Summary list: label, value, action */
+
+.summary {
+  margin: 0 0 var(--space-4);
+}
+
+.summary > div {
+  display: grid;
+  grid-template-columns: 7.5rem minmax(0, 1fr) auto;
+  gap: var(--space-3);
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.summary dt {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
+.summary dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+  white-space: pre-line;
+}
+
+.summary-edit {
+  font-size: var(--text-sm);
+}
+
+@media (min-width: 60rem) {
+  .summary > div {
+    grid-template-columns: 10rem minmax(0, 1fr) auto;
+    gap: var(--space-6);
+  }
+}
+
+@media (max-width: 30rem) {
+  .summary > div {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .summary dt {
+    grid-column: 1 / -1;
+  }
+}
+
+/* ── Utilities ──────────────────────────────────────────────────────── */
+
+.muted {
+  color: var(--text-muted);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+  }
+}
+
+/* Progress towards a goal, such as how much of a wishlist item has been paid for. */
+.meter {
+  display: block;
+  width: 100%;
+  height: 0.5rem;
+  margin: var(--space-2) 0;
+  overflow: hidden;
+  appearance: none;
+  background: var(--border);
+  border: 0;
+  border-radius: 999px;
+}
+
+.meter::-webkit-progress-bar {
+  background: var(--border);
+}
+
+.meter::-webkit-progress-value {
+  background: var(--success, var(--primary));
+  border-radius: 999px;
+}
+
+.meter::-moz-progress-bar {
+  background: var(--success, var(--primary));
+  border-radius: 999px;
+}
+
+/* Dropdown and date fields: the app's own, in place of the browser's. */
+.select {
+  position: relative;
+}
+
+.select-button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  width: 100%;
+  min-width: 0;
+  min-height: var(--control-height);
+  padding: var(--space-2) var(--space-3);
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  background: var(--surface);
+  border: 1px solid var(--field-border);
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+
+.select-button:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.select-button[aria-expanded='true'] {
+  border-color: var(--focus);
+}
+
+.select-value {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.select-value--placeholder {
+  color: var(--text-muted);
+}
+
+.select-chevron,
+.select-icon,
+.select-check,
+.calendar-nav svg {
+  flex: none;
+  width: 1.25rem;
+  height: 1.25rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.select-chevron,
+.select-icon {
+  color: var(--text-muted);
+}
+
+/* Invisible, but there so a required dropdown stops a form from being submitted empty. */
+.select-proxy {
+  position: absolute;
+  inset: auto 0 0;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.popover {
+  z-index: 50;
+  overflow: auto;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.12);
+}
+
+.select-list {
+  margin: 0;
+  padding: var(--space-1);
+  list-style: none;
+}
+
+.select-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-height: var(--control-height);
+  padding: var(--space-2) var(--space-3);
+  cursor: pointer;
+  border-radius: var(--radius);
+}
+
+.select-option--active {
+  background: var(--bg);
+}
+
+.select-option[aria-selected='true'] {
+  color: var(--accent);
+}
+
+.calendar {
+  width: 19rem;
+  max-width: calc(100vw - 2rem);
+  padding: var(--space-3);
+}
+
+.calendar-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-2);
+}
+
+.calendar-title {
+  margin: 0;
+}
+
+.calendar-nav {
+  display: grid;
+  place-items: center;
+  width: var(--control-height);
+  height: var(--control-height);
+  padding: 0;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.calendar-nav:hover,
+.calendar-day:hover:not(:disabled):not([aria-pressed='true']) {
+  background: var(--bg);
+}
+
+.calendar-grid {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.calendar-grid th {
+  padding-bottom: var(--space-1);
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  font-weight: var(--weight-regular);
+}
+
+.calendar-grid td {
+  padding: 1px;
+  text-align: center;
+}
+
+.calendar-day {
+  width: 100%;
+  min-height: 2.5rem;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.calendar-day[aria-current='date'] {
+  border-color: var(--field-border);
+}
+
+.calendar-day[aria-pressed='true'] {
+  color: var(--on-primary);
+  background: var(--primary);
+  border-color: var(--primary);
+}
+
+.calendar-day:disabled {
+  color: var(--text-muted);
+  text-decoration: line-through;
+  cursor: default;
+  opacity: 0.5;
+}
+
+.select-button:focus-visible,
+.calendar-nav:focus-visible,
+.calendar-day:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.calendar-foot {
+  display: flex;
+  justify-content: space-between;
+  margin-top: var(--space-2);
+}
+
+[aria-invalid='true'].select-button {
+  border-color: var(--danger);
+}
