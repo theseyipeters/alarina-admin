@@ -15,6 +15,7 @@ type Action = 'suspend' | 'restore' | 'signout' | 'unlock' | 'lock'
 type Tab = 'guests' | 'payments' | 'history'
 
 const KINDS: GiftKind[] = ['cash', 'aso_ebi', 'wishlist']
+const REPLY_PILLS = { attending: ' pill--success', declined: '', rejected: ' pill--danger' }
 
 export default function CoupleDetail() {
   const { id = '' } = useParams()
@@ -94,9 +95,10 @@ export default function CoupleDetail() {
       <dl className="kpis">
         <div className="kpi">
           <dt>Replies</dt>
-          <dd className="kpi-value">{formatCount(stats.replies.attending + stats.replies.declined)}</dd>
+          <dd className="kpi-value">{formatCount(stats.replies.attending + stats.replies.declined + stats.replies.rejected)}</dd>
           <dd className="kpi-sub">
             {formatCount(stats.replies.attending)} attending · {formatCount(stats.replies.declined)} declined
+            {stats.replies.rejected > 0 && ` · ${formatCount(stats.replies.rejected)} rejected`}
           </dd>
         </div>
         {KINDS.map((k) => (
@@ -363,7 +365,7 @@ function Guests({ data }: { data: Data }) {
               </th>
               <td data-label="Phone">{r.phone}</td>
               <td data-label="Reply">
-                <span className={`pill${r.attending ? ' pill--success' : ''}`}>{r.attending ? 'Attending' : 'Declined'}</span>
+                <span className={`pill${REPLY_PILLS[r.reply]}`}>{r.reply[0].toUpperCase() + r.reply.slice(1)}</span>
               </td>
               <td data-label="Side">{r.side ?? <span className="muted">Not set</span>}</td>
               <td data-label="Replied">{formatDateTime(r.createdAt)}</td>
