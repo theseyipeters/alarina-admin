@@ -21,7 +21,7 @@ export default function Overview() {
   if (!data) return <p className="muted">Loading…</p>
 
   const { totals: t, trends, upcoming, recent, system } = data
-  const replies = t.rsvps.attending + t.rsvps.declined
+  const replies = t.rsvps.attending + t.rsvps.declined + t.rsvps.rejected
   const weddings = t.weddings.draft + t.weddings.published
   const giftTotal = KINDS.reduce((s, k) => s + t.gifts.byKind[k.kind].amount, 0)
   const sum = (points: { value: number }[]) => points.reduce((s, p) => s + p.value, 0)
@@ -64,6 +64,7 @@ export default function Overview() {
           <dd className="kpi-value">{formatCount(replies)}</dd>
           <dd className="kpi-sub">
             {formatCount(t.rsvps.attending)} attending · {formatCount(t.rsvps.declined)} declined
+            {t.rsvps.rejected > 0 && ` · ${formatCount(t.rsvps.rejected)} rejected`}
           </dd>
         </div>
         <div className="kpi">

@@ -16,7 +16,7 @@ export type Overview = {
     users: number
     suspended: number
     weddings: { draft: number; published: number }
-    rsvps: { attending: number; declined: number }
+    rsvps: { attending: number; declined: number; rejected: number }
     gifts: { amount: number; fees: number; count: number; weddings: number; byKind: KindTotals }
     unlocks: { paid: number; revenue: number; comped: number }
     pendingPayments: number
@@ -126,8 +126,8 @@ export type CoupleDetail = {
     createdAt: string
     updatedAt: string
   } | null
-  stats: { replies: { attending: number; declined: number }; gifts: KindTotals }
-  rsvps: { id: string; name: string; email: string; phone: string; attending: boolean; side: string | null; createdAt: string }[]
+  stats: { replies: { attending: number; declined: number; rejected: number }; gifts: KindTotals }
+  rsvps: { id: string; name: string; email: string; phone: string; reply: 'attending' | 'declined' | 'rejected'; side: string | null; createdAt: string }[]
   payments: {
     id: string
     reference: string
