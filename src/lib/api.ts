@@ -15,6 +15,9 @@ export class ApiError extends Error {
 // The admin API lives under /api/admin on the same server as the couples' API (VITE_API_URL).
 export const API_BASE = `${import.meta.env.VITE_API_URL.replace(/\/$/, '')}/api/admin`
 
+/** A listing's photo, from the public image route the marketplace uses. */
+export const imageSrc = (id: string) => `${import.meta.env.VITE_API_URL.replace(/\/$/, '')}/api/public/images/${id}`
+
 async function request<T>(path: string, init: RequestInit & { json?: unknown } = {}): Promise<T> {
   const { json, ...rest } = init
   const res = await fetch(`${API_BASE}${path}`, {

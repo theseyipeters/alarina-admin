@@ -43,6 +43,14 @@ export default function Overview() {
         </div>
       )}
 
+      {t.marketplace.vendors.pending > 0 && (
+        <div className="alert alert--info" role="status">
+          <p>
+            {plural(t.marketplace.vendors.pending, 'vendor listing')} waiting for review. <Link to="/vendors">Review listings</Link>
+          </p>
+        </div>
+      )}
+
       <dl className="kpis">
         <div className="kpi">
           <dt>Couples</dt>
@@ -79,6 +87,21 @@ export default function Overview() {
           <dd className="kpi-value">{formatNairaShort(t.unlocks.revenue)}</dd>
           <dd className="kpi-sub">
             {formatCount(t.unlocks.paid)} paid · {formatCount(t.unlocks.comped)} granted free
+          </dd>
+        </div>
+        <div className="kpi">
+          <dt>Live vendors</dt>
+          <dd className="kpi-value">{formatCount(t.marketplace.vendors.approved)}</dd>
+          <dd className="kpi-sub">
+            {formatCount(t.marketplace.vendors.pending)} waiting for review
+            {t.marketplace.vendors.suspended > 0 && ` · ${formatCount(t.marketplace.vendors.suspended)} suspended`}
+          </dd>
+        </div>
+        <div className="kpi">
+          <dt>Paid to vendors</dt>
+          <dd className="kpi-value">{formatNairaShort(t.marketplace.payments.amount)}</dd>
+          <dd className="kpi-sub">
+            {plural(t.marketplace.payments.count, 'payment')} · {plural(t.marketplace.bookings, 'accepted booking')}
           </dd>
         </div>
         <div className="kpi">

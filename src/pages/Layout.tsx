@@ -6,6 +6,7 @@ import Logo from '../components/Logo.tsx'
 const NAV = [
   { to: '/', label: 'Overview', end: true },
   { to: '/couples', label: 'Couples', end: false },
+  { to: '/vendors', label: 'Vendors', end: false },
   { to: '/payments', label: 'Payments', end: false },
   { to: '/activity', label: 'Activity', end: false },
   { to: '/staff', label: 'Staff', end: false },

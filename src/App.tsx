@@ -9,6 +9,8 @@ import SignIn from './pages/SignIn.tsx'
 const Setup = lazy(() => import('./pages/Setup.tsx'))
 const Couples = lazy(() => import('./pages/Couples.tsx'))
 const CoupleDetail = lazy(() => import('./pages/CoupleDetail.tsx'))
+const Vendors = lazy(() => import('./pages/Vendors.tsx'))
+const VendorDetail = lazy(() => import('./pages/VendorDetail.tsx'))
 const Payments = lazy(() => import('./pages/Payments.tsx'))
 const Activity = lazy(() => import('./pages/Activity.tsx'))
 const Staff = lazy(() => import('./pages/Staff.tsx'))
@@ -28,6 +30,8 @@ export default function App() {
                 <Route index element={<Overview />} />
                 <Route path="couples" element={<Couples />} />
                 <Route path="couples/:id" element={<CoupleDetail />} />
+                <Route path="vendors" element={<Vendors />} />
+                <Route path="vendors/:id" element={<VendorDetail />} />
                 <Route path="payments" element={<Payments />} />
                 <Route path="activity" element={<Activity />} />
                 <Route path="staff" element={<Staff />} />

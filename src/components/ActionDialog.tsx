@@ -11,6 +11,11 @@ type Props = {
   danger?: boolean
   /** Ask staff to say why. The reason is kept in the activity log. */
   askReason?: boolean
+  /** Let staff leave the reason empty (an approval note, say). */
+  reasonOptional?: boolean
+  reasonLabel?: string
+  reasonHint?: string
+  reasonPlaceholder?: string
   onConfirm: (reason: string) => Promise<void>
   onClose: () => void
 }
@@ -19,7 +24,21 @@ type Props = {
  * Confirms an action on a couple's account. Native <dialog>: focus is trapped while it's open,
  * starts on Cancel (the safe choice), and returns to the button that opened it.
  */
-export default function ActionDialog({ open, title, children, confirmLabel, busyLabel, danger, askReason = true, onConfirm, onClose }: Props) {
+export default function ActionDialog({
+  open,
+  title,
+  children,
+  confirmLabel,
+  busyLabel,
+  danger,
+  askReason = true,
+  reasonOptional = false,
+  reasonLabel = 'Reason',
+  reasonHint = 'Kept in the activity log, with your name.',
+  reasonPlaceholder = 'Requested by the couple on WhatsApp',
+  onConfirm,
+  onClose,
+}: Props) {
   const ref = useRef<HTMLDialogElement>(null)
   const cancelRef = useRef<HTMLButtonElement>(null)
   const opener = useRef<Element | null>(null)
@@ -45,7 +64,7 @@ export default function ActionDialog({ open, title, children, confirmLabel, busy
 
   async function submit(e: React.FormEvent) {
     e.preventDefault()
-    if (askReason && reason.trim().length < 3) {
+    if (askReason && !reasonOptional && reason.trim().length < 3) {
       setError('Say why, in a few words. It’s kept in the activity log.')
       return
     }
@@ -68,9 +87,9 @@ export default function ActionDialog({ open, title, children, confirmLabel, busy
         <div className="muted">{children}</div>
         {askReason && (
           <div className="section">
-            <Field label="Reason" hint="Kept in the activity log, with your name." error={error}>
+            <Field label={reasonOptional ? `${reasonLabel} (optional)` : reasonLabel} hint={reasonHint} error={error}>
               {(p) => (
-                <textarea {...p} rows={3} maxLength={500} value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Requested by the couple on WhatsApp" />
+                <textarea {...p} rows={3} maxLength={500} value={reason} onChange={(e) => setReason(e.target.value)} placeholder={reasonPlaceholder} />
               )}
             </Field>
           </div>

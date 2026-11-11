@@ -6,7 +6,7 @@ import { KIND_LABEL } from '../lib/labels.ts'
 import { api, query } from '../lib/api.ts'
 import { errorMessage } from '../lib/errors.ts'
 import { formatDateTime, formatNaira, plural } from '../lib/format.ts'
-import type { GiftPayment, Paged, UnlockRow } from '../lib/types.ts'
+import type { GiftPayment, Paged, UnlockRow, VendorPaymentRow } from '../lib/types.ts'
 import { useApi } from '../lib/useApi.ts'
 import { useSearchState } from '../lib/useSearchState.ts'
 import { useTitle } from '../lib/useTitle.ts'
@@ -36,14 +36,29 @@ const DEFAULTS = { type: 'gifts', q: '', status: 'all', kind: 'all', source: 'al
 
 type GiftsPage = Paged<GiftPayment> & { summary: { received: number; fees: number; succeeded: number } }
 type UnlocksPage = Paged<UnlockRow> & { summary: { revenue: number; succeeded: number } }
+type VendorsPage = Paged<VendorPaymentRow> & { summary: { paid: number; fees: number; succeeded: number } }
+
+const TYPES = [
+  { value: 'gifts', label: 'Guest gifts' },
+  { value: 'vendors', label: 'Vendor payments' },
+  { value: 'unlocks', label: 'Gifts unlocks' },
+] as const
 
 export default function Payments() {
   useTitle('Payments')
   const [f, set] = useSearchState(DEFAULTS)
   const [search, setSearch] = useState(f.q)
-  const gifts = f.type !== 'unlocks'
-  const qs = query({ q: f.q, status: f.status, ...(gifts ? { kind: f.kind } : { source: f.source }), page: f.page === '1' ? undefined : f.page })
-  const { data, error, loading, reload } = useApi<GiftsPage | UnlocksPage>(`/payments/${gifts ? 'gifts' : 'unlocks'}${qs}`)
+  const type = TYPES.some((t) => t.value === f.type) ? (f.type as (typeof TYPES)[number]['value']) : 'gifts'
+  const gifts = type === 'gifts'
+  const vendors = type === 'vendors'
+  const qs = query({
+    q: f.q,
+    status: f.status,
+    ...(gifts && { kind: f.kind }),
+    ...(type === 'unlocks' && { source: f.source }),
+    page: f.page === '1' ? undefined : f.page,
+  })
+  const { data, error, loading, reload } = useApi<GiftsPage | UnlocksPage | VendorsPage>(`/payments/${type}${qs}`)
   const [busy, setBusy] = useState<string | null>(null)
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null)
 
@@ -56,7 +71,7 @@ export default function Payments() {
     setBusy(id)
     setMessage(null)
     try {
-      const res = await api.post<{ status: string; changed: boolean }>(`/payments/${gifts ? 'gifts' : 'unlocks'}/${id}/recheck`)
+      const res = await api.post<{ status: string; changed: boolean }>(`/payments/${type}/${id}/recheck`)
       setMessage({ ok: true, text: res.changed ? `Paystack says it’s now ${res.status}. Updated.` : `Paystack still has it as ${res.status}. Nothing changed.` })
       reload()
     } catch (err) {
@@ -68,24 +83,24 @@ export default function Payments() {
 
   // Only the current tab's data is the right shape; ignore a stale page from the other tab while loading.
   const giftData = gifts && data && 'summary' in data && 'received' in data.summary ? (data as GiftsPage) : null
-  const unlockData = !gifts && data && 'summary' in data && 'revenue' in data.summary ? (data as UnlocksPage) : null
+  const unlockData = type === 'unlocks' && data && 'summary' in data && 'revenue' in data.summary ? (data as UnlocksPage) : null
+  const vendorData = vendors && data && 'summary' in data && 'paid' in data.summary ? (data as VendorsPage) : null
 
   return (
     <>
       <div className="page-head">
         <div>
           <h1>Payments</h1>
-          <p>Guests’ gifts to couples, and couples’ Gifts unlock payments to Alárinà.</p>
+          <p>Guests’ gifts to couples, couples’ payments to vendors, and Gifts unlock payments to Alárinà.</p>
         </div>
       </div>
 
       <div className="subnav" role="tablist" aria-label="Payment type">
-        <button role="tab" aria-selected={gifts} onClick={() => set({ type: 'gifts', source: 'all' })}>
-          Guest gifts
-        </button>
-        <button role="tab" aria-selected={!gifts} onClick={() => set({ type: 'unlocks', kind: 'all' })}>
-          Gifts unlocks
-        </button>
+        {TYPES.map((t) => (
+          <button key={t.value} role="tab" aria-selected={type === t.value} onClick={() => set({ type: t.value, kind: 'all', source: 'all' })}>
+            {t.label}
+          </button>
+        ))}
       </div>
 
       <div className="filters">
@@ -93,7 +108,7 @@ export default function Payments() {
           className="search"
           type="search"
           aria-label="Search payments"
-          placeholder={gifts ? 'Guest, email, couple or reference' : 'Couple or reference'}
+          placeholder={gifts ? 'Guest, email, couple or reference' : vendors ? 'Vendor, couple or reference' : 'Couple or reference'}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
@@ -104,19 +119,21 @@ export default function Payments() {
             </button>
           ))}
         </div>
-        <div className="chips" role="group" aria-label={gifts ? 'Kind' : 'Source'}>
-          {(gifts ? KINDS : SOURCES).map((s) => (
-            <button
-              key={s.value}
-              type="button"
-              className="chip"
-              aria-pressed={(gifts ? f.kind : f.source) === s.value}
-              onClick={() => set(gifts ? { kind: s.value } : { source: s.value })}
-            >
-              {s.label}
-            </button>
-          ))}
-        </div>
+        {!vendors && (
+          <div className="chips" role="group" aria-label={gifts ? 'Kind' : 'Source'}>
+            {(gifts ? KINDS : SOURCES).map((s) => (
+              <button
+                key={s.value}
+                type="button"
+                className="chip"
+                aria-pressed={(gifts ? f.kind : f.source) === s.value}
+                onClick={() => set(gifts ? { kind: s.value } : { source: s.value })}
+              >
+                {s.label}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {error && <div className="alert" role="alert"><p>{error}</p></div>}
@@ -192,6 +209,62 @@ export default function Payments() {
             {!giftData.items.length && <p className="empty">No payments match.</p>}
           </div>
           <Pager page={giftData.page} pageSize={giftData.pageSize} total={giftData.total} noun="payments" onPage={(p) => set({ page: String(p) })} />
+        </div>
+      )}
+
+      {vendorData && (
+        <div aria-busy={loading}>
+          <p className="muted">
+            {formatNaira(vendorData.summary.paid)} paid to vendors across {plural(vendorData.summary.succeeded, 'payment')} in this view, plus{' '}
+            {formatNaira(vendorData.summary.fees)} in Paystack fees covered by couples.
+          </p>
+          <div className="table-wrap">
+            <table className="table">
+              <thead>
+                <tr>
+                  <th scope="col">Vendor</th>
+                  <th scope="col">Couple</th>
+                  <th scope="col" className="num">Vendor gets</th>
+                  <th scope="col" className="num">Couple paid</th>
+                  <th scope="col">Status</th>
+                  <th scope="col">When</th>
+                </tr>
+              </thead>
+              <tbody>
+                {vendorData.items.map((p) => (
+                  <tr key={p.id}>
+                    <th scope="row">
+                      <span className="cell-main">
+                        {p.vendor ? <Link to={`/vendors/${p.vendor.id}`}>{p.vendor.businessName}</Link> : <span className="muted">Deleted</span>}
+                        <span className="cell-sub mono">{p.reference}</span>
+                      </span>
+                    </th>
+                    <td data-label="Couple">
+                      {p.wedding ? <Link to={`/couples/${p.wedding.coupleId}`}>{p.wedding.names || 'Unnamed'}</Link> : <span className="muted">Deleted</span>}
+                    </td>
+                    <td data-label="Vendor gets" className="num">{formatNaira(p.amount)}</td>
+                    <td data-label="Couple paid" className="num">
+                      {formatNaira(p.charge)}
+                      <span className="cell-sub">fee {formatNaira(p.fee)}</span>
+                    </td>
+                    <td data-label="Status">
+                      <span className="cell-main">
+                        <PaymentPill status={p.status} />
+                        {p.status !== 'success' && (
+                          <button className="link-button cell-sub" disabled={busy === p.id} onClick={() => recheck(p.id)}>
+                            {busy === p.id ? 'Checking…' : 'Re-check with Paystack'}
+                          </button>
+                        )}
+                      </span>
+                    </td>
+                    <td data-label="When">{formatDateTime(p.paidAt ?? p.createdAt)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {!vendorData.items.length && <p className="empty">No vendor payments match.</p>}
+          </div>
+          <Pager page={vendorData.page} pageSize={vendorData.pageSize} total={vendorData.total} noun="payments" onPage={(p) => set({ page: String(p) })} />
         </div>
       )}
 

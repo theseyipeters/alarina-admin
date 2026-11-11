@@ -13,6 +13,10 @@ export const ACTION_LABEL: Record<string, string> = {
   'gifts.unlocked': 'Unlocked Gifts for',
   'gifts.locked': 'Locked Gifts for',
   'payment.rechecked': 'Re-checked payment',
+  'vendor.approved': 'Approved',
+  'vendor.rejected': 'Asked for changes to',
+  'vendor.suspended': 'Suspended vendor',
+  'vendor.restored': 'Restored vendor',
 }
 
 /** "Suspended Ada & Tobi", "Re-checked payment alr_3f… (pending → success)". */

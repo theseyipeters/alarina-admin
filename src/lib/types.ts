@@ -20,6 +20,11 @@ export type Overview = {
     gifts: { amount: number; fees: number; count: number; weddings: number; byKind: KindTotals }
     unlocks: { paid: number; revenue: number; comped: number }
     pendingPayments: number
+    marketplace: {
+      vendors: { pending: number; approved: number; suspended: number }
+      bookings: number
+      payments: { amount: number; count: number }
+    }
   }
   trends: { days: number; signups: Point[]; published: Point[]; rsvps: Point[]; gifts: Point[]; unlockRevenue: Point[] }
   upcoming: {
@@ -70,7 +75,7 @@ export type AuditEntry = {
   action: string
   admin: { id: string; name: string; email: string }
   coupleId: string | null
-  targetType: 'couple' | 'payment' | 'unlock' | 'staff' | null
+  targetType: 'couple' | 'payment' | 'unlock' | 'staff' | 'vendor' | null
   targetId: string | null
   targetLabel: string | null
   reason: string | null
@@ -175,3 +180,63 @@ export type Staff = {
 }
 
 export type SetupLink = { link: string; expiresAt: string; emailSent: boolean }
+
+export type VendorStatus = 'draft' | 'pending' | 'approved' | 'rejected' | 'suspended'
+
+export type VendorRow = {
+  id: string
+  businessName: string
+  category: string
+  city: string | null
+  status: VendorStatus
+  submittedAt: string | null
+  reviewedAt: string | null
+  payoutReady: boolean
+  createdAt: string
+}
+
+export type VendorPaymentRow = {
+  id: string
+  reference: string
+  wedding: { coupleId: string; names: string; slug: string | null } | null
+  vendor: { id: string; businessName: string } | null
+  amount: number
+  fee: number
+  charge: number
+  status: PaymentStatus
+  createdAt: string
+  paidAt: string | null
+}
+
+export type VendorDetail = {
+  vendor: {
+    id: string
+    slug: string
+    businessName: string
+    category: string
+    status: VendorStatus
+    description: string
+    city: string
+    phone: string
+    email: string
+    website: string
+    instagram: string
+    coverImageId: string | null
+    gallery: string[]
+    priceFrom: number | null
+    packages: { id: string; name: string; description: string; price: number }[]
+    products: { id: string; name: string; description: string; imageId: string | null; price: number; active: boolean }[]
+    submittedAt: string | null
+    reviewedAt: string | null
+    reviewedBy: string | null
+    reviewNote: string | null
+    marketplaceUrl: string
+    payout: { bankName: string; accountName: string; accountLast4: string } | null
+    createdAt: string
+  }
+  owner: { name: string; email: string; createdAt: string } | null
+  bookings: { enquiry: number; quoted: number; accepted: number; cancelled: number }
+  paid: { amount: number; count: number }
+  payments: VendorPaymentRow[]
+  history: { id: string; action: string; admin: { name: string; email: string }; reason: string | null; createdAt: string }[]
+}

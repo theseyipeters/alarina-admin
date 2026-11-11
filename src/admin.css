@@ -896,3 +896,52 @@
   font-size: var(--text-sm);
   overflow-wrap: anywhere;
 }
+
+/* ── Vendor listing ─────────────────────────────────────────────────── */
+
+/* The cover photo spans two columns; the rest of the gallery fills in beside and below it. */
+.photos {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(6.5rem, 1fr));
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.photo {
+  display: block;
+  aspect-ratio: 1;
+  overflow: hidden;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.photo--cover {
+  grid-column: span 2;
+  grid-row: span 2;
+}
+
+.photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.prose {
+  margin: 0 0 var(--space-4);
+  white-space: pre-line;
+}
+
+.thumb {
+  flex: none;
+  width: 3rem;
+  height: 3rem;
+  object-fit: cover;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.list-grow {
+  flex: 1;
+}
